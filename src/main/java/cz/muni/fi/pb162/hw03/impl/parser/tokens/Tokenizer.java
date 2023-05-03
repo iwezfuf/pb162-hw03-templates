@@ -170,6 +170,27 @@ public final class Tokenizer {
         return token;
     }
 
+
+    /**
+     * Consume, but ignore parentheses.
+     *
+     * @return consumed token
+     */
+    public Token consumeKeyword() {
+        var token = get();
+        skip(token.getSize());
+
+        if (mode.isSkipWhiteSpace()) {
+            skipWhitespace();
+        }
+
+        if (token.getKind().equals(Token.Kind.OPEN) || token.getKind().equals(Token.Kind.CLOSE)) {
+            return consumeKeyword();
+        }
+        return token;
+    }
+
+
     /**
      * The same token as returned by last call to {@link #get()}
      * @return last token;
