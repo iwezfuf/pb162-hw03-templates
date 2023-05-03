@@ -6,6 +6,9 @@ import cz.muni.fi.pb162.hw03.impl.parser.tokens.Tokenizer;
 import cz.muni.fi.pb162.hw03.template.TemplateException;
 import cz.muni.fi.pb162.hw03.template.model.ModelException;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 
 public class Parser {
     MapModel model;
@@ -25,7 +28,6 @@ public class Parser {
         StringBuilder stringBuilder = new StringBuilder();
 
         while (!tokenizer.done()) {
-//            System.out.println(stringBuilder.toString());
             Token token = tokenizer.consumeKeyword();
             if (token.getKind().equals(Token.Kind.TEXT)) {
                 stringBuilder.append(token.text());
@@ -54,54 +56,36 @@ public class Parser {
         if (tokenizer.getLastToken().cmd().equals("for")) {
             return parseFor(tokenizer, model);
         }
-        System.out.println(tokenizer.getLastToken().cmd());
-        throw new TemplateException("Invalid command: " + tokenizer.getLastTokenKind().name());
+        throw new TemplateException("Invalid command: " + tokenizer.getLastToken().cmd());
     }
 
     public String parseIf(Tokenizer tokenizer, MapModel model) {
         String result = "";
         Token ifToken = tokenizer.consumeKeyword();
         if (model.getAsBoolean(ifToken.name())) {
-            tokenizer.consumeKeyword();
             result = parseFromTokenizer(tokenizer, model);
         } else {
-            tokenizer.consumeKeyword();
-            tokenizer.consumeKeyword();
-//            tokenizer.consumeKeyword();
-            System.out.println("grrve" + tokenizer.getLastTokenKind());
+            parseFromTokenizer(tokenizer, model);
         }
-        tokenizer.consumeKeyword();
-        tokenizer.consumeKeyword();
-//        System.out.println("aaa" + tokenizer.consumeKeyword().text());
-//        System.out.println("a" + tokenizer.consumeKeyword().getKind());
-//
-//        if (tokenizer.consumeKeyword().getKind().equals(Token.Kind.CMD)) {
-//            System.out.println("Here:" + tokenizer.getLastToken().cmd());
-//        }
-        if (tokenizer.getLastToken().getKind().equals(Token.Kind.CMD) && tokenizer.getLastToken().cmd().equals("else")) {
-            System.out.println("oinside else");
+        if (tokenizer.getLastTokenKind().equals(Token.Kind.CMD) && tokenizer.getLastToken().cmd().equals("else")) {
             if (!model.getAsBoolean(ifToken.name())) {
-                tokenizer.consumeKeyword();
-//                tokenizer.consumeKeyword();
-//                System.out.println(tokenizer.getLastToken().text());
                 result = parseFromTokenizer(tokenizer, model);
             } else {
-                tokenizer.consumeKeyword();
-                tokenizer.consumeKeyword();
-                tokenizer.consumeKeyword();
-                tokenizer.consumeKeyword();
-
+                parseFromTokenizer(tokenizer, model);
             }
         }
-        Token token = tokenizer.consumeKeyword();
-        while (!token.getKind().equals(Token.Kind.CMD) || !token.cmd().equals("done")) {
-            token = tokenizer.consumeKeyword();
-        }
-        System.out.println("result: " + result);
         return result;
     }
 
     public String parseFor(Tokenizer tokenizer, MapModel model) {
-        return "";
+        StringBuilder stringBuilder = new StringBuilder();
+        String varName = tokenizer.consumeKeyword().name();
+        Iterable iterable = model.getAsIterable(tokenizer.consumeKeyword().name());
+        tokenizer.consume();
+        for (var variable : iterable) {
+            stringBuilder.append(parseFromTokenizer(tokenizer.copy(), (MapModel) model.extended(varName, variable)));
+        }
+        parseFromTokenizer(tokenizer, (MapModel) model.copy());
+        return stringBuilder.toString();
     }
 }

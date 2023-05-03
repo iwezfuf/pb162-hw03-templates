@@ -170,21 +170,16 @@ public final class Tokenizer {
         return token;
     }
 
-
     /**
      * Consume, but ignore parentheses.
      *
      * @return consumed token
      */
     public Token consumeKeyword() {
-        var token = get();
-        skip(token.getSize());
+        var token = consume();
 
-        if (mode.isSkipWhiteSpace()) {
-            skipWhitespace();
-        }
-
-        if (token.getKind().equals(Token.Kind.OPEN) || token.getKind().equals(Token.Kind.CLOSE)) {
+        if (token.getKind().equals(Token.Kind.OPEN) || token.getKind().equals(Token.Kind.CLOSE) ||
+                token.getKind().equals(Token.Kind.IN)) {
             return consumeKeyword();
         }
         return token;
@@ -213,5 +208,9 @@ public final class Tokenizer {
      */
     public boolean done() {
         return input.isEmpty();
+    }
+
+    public Tokenizer copy() {
+        return new Tokenizer(input);
     }
 }
