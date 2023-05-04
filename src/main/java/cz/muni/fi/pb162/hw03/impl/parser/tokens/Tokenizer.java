@@ -210,6 +210,9 @@ public final class Tokenizer {
         return input.isEmpty();
     }
 
+    /**
+     * @return copy of this tokenizer
+     */
     public Tokenizer copy() {
         return new Tokenizer(input);
     }

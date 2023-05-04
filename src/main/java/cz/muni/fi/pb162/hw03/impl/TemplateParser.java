@@ -6,25 +6,29 @@ import cz.muni.fi.pb162.hw03.impl.parser.tokens.Tokenizer;
 import cz.muni.fi.pb162.hw03.template.TemplateException;
 import cz.muni.fi.pb162.hw03.template.model.ModelException;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
-
-public class Parser {
-    MapModel model;
-    Template template;
-
-    public Parser(MapModel model, Template template) {
-        this.model = model;
-        this.template = template;
-    }
-
-    public String parseTemplate(Template template, MapModel model) {
-        Tokenizer tokenizer = new Tokenizer(template.getData());
+/**
+ * Template parser
+ * @author Martin Drazkovec, 536686
+ */
+public class TemplateParser {
+    /**
+     * Parses template
+     * @param template template to parse
+     * @param model model to use
+     * @return parsed template
+     */
+    public static String parseTemplate(Template template, MapModel model) {
+        Tokenizer tokenizer = new Tokenizer(template.data());
         return parseFromTokenizer(tokenizer, model);
     }
 
-    public String parseFromTokenizer(Tokenizer tokenizer, MapModel model) {
+    /**
+     * Parses template from tokenizer
+     * @param tokenizer tokenizer to parse from
+     * @param model model to use
+     * @return parsed template
+     */
+    private static String parseFromTokenizer(Tokenizer tokenizer, MapModel model) {
         StringBuilder stringBuilder = new StringBuilder();
 
         while (!tokenizer.done()) {
@@ -49,7 +53,13 @@ public class Parser {
         return stringBuilder.toString();
     }
 
-    public String parseCommand(Tokenizer tokenizer, MapModel model) {
+    /**
+     * Parses command
+     * @param tokenizer tokenizer to parse from
+     * @param model model to use
+     * @return parsed command
+     */
+    private static String parseCommand(Tokenizer tokenizer, MapModel model) {
         if (tokenizer.getLastToken().cmd().equals("if")) {
             return parseIf(tokenizer, model);
         }
@@ -59,7 +69,13 @@ public class Parser {
         throw new TemplateException("Invalid command: " + tokenizer.getLastToken().cmd());
     }
 
-    public String parseIf(Tokenizer tokenizer, MapModel model) {
+    /**
+     * Parses if command
+     * @param tokenizer tokenizer to parse from
+     * @param model model to use
+     * @return parsed if command
+     */
+    private static String parseIf(Tokenizer tokenizer, MapModel model) {
         String result = "";
         Token ifToken = tokenizer.consumeKeyword();
         if (model.getAsBoolean(ifToken.name())) {
@@ -77,7 +93,13 @@ public class Parser {
         return result;
     }
 
-    public String parseFor(Tokenizer tokenizer, MapModel model) {
+    /**
+     * Parses for command
+     * @param tokenizer tokenizer to parse from
+     * @param model model to use
+     * @return parsed for command
+     */
+    private static String parseFor(Tokenizer tokenizer, MapModel model) {
         StringBuilder stringBuilder = new StringBuilder();
         String varName = tokenizer.consumeKeyword().name();
         Iterable iterable = model.getAsIterable(tokenizer.consumeKeyword().name());
