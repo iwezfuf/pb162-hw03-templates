@@ -171,6 +171,22 @@ public final class Tokenizer {
     }
 
     /**
+     * Consume, but ignore parentheses.
+     *
+     * @return consumed token
+     */
+    public Token consumeKeyword() {
+        var token = consume();
+
+        if (token.getKind().equals(Token.Kind.OPEN) || token.getKind().equals(Token.Kind.CLOSE) ||
+                token.getKind().equals(Token.Kind.IN)) {
+            return consumeKeyword();
+        }
+        return token;
+    }
+
+
+    /**
      * The same token as returned by last call to {@link #get()}
      * @return last token;
      */
@@ -192,5 +208,12 @@ public final class Tokenizer {
      */
     public boolean done() {
         return input.isEmpty();
+    }
+
+    /**
+     * @return copy of this tokenizer
+     */
+    public Tokenizer copy() {
+        return new Tokenizer(input);
     }
 }
